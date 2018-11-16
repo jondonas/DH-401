@@ -1,6 +1,8 @@
 <head>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <link rel="stylesheet" href="css/styling.css">
 </head>
 
 <title>DH-405</title>
@@ -13,9 +15,12 @@
 </style>
 
 <body>
-    <h1 style="margin-top: 20px;">Welcome to Florian and Jonathan's Project!</h1>
-    <p>Shortest route between two intersections extracted from an old map of New York.</p>
-    <div id="mapDiv" style="width:600px; height:600px; margin: 0 auto; background-color: lightblue;"></div>
+    <div>
+        <h1>Welcome to Florian and Jonathan's Project!</h1>
+        <p>Shortest route between two intersections extracted from an old map of New York.</p>
+        <button onclick="clearPaths()">Clear Paths</button>
+    </div>
+    <div id="mapDiv"></div>
 
     <script>
         var mapDirectory = "maps/new-york.txt";
@@ -231,8 +236,8 @@
             mode: 'markers',
             hoverinfo: 'text',
             marker: {
-                color: Array(nodesX.length).fill('black'),
-                size: Array(nodesX.length).fill(5)
+                color: 'black',
+                size: 5
             }
         };
 
@@ -243,20 +248,22 @@
             showlegend: false,
             hovermode: 'closest',
             margin: {
-                b: 5,
-                l: 5,
-                r: 5,
-                t: 5
+                b: 0,
+                l: 0,
+                r: 0,
+                t: 0
             },
             xaxis: {
                 showgrid: false,
                 zeroline: false,
-                showticklabels: false
+                showticklabels: false,
+                fixedrange: true
             },
             yaxis: {
                 showgrid: false,
                 zeroline: false,
-                showticklabels: false
+                showticklabels: false,
+                fixedrange: true
             }
         };
 
@@ -264,14 +271,59 @@
             displayModeBar: false
         });
 
+        // Keep track of extra traces that are displayed
+        var lastTrace = null;
+        var tracesAdded = 0;
+
         // Action for when a node is clicked on
         myPlot.on('plotly_click', function(data) {
-            var pts = '';
-            for (var i = 0; i < data.points.length; i++) {
-                pts = 'x = ' + data.points[i].x + '\ny = ' +
-                    data.points[i].y.toPrecision(4) + '\n\n';
+            var x = data.points[0].x;
+            var y = data.points[0].y;
+
+            if (lastTrace == null) {
+                // Draw the starting node
+                lastTrace = {
+                    x: [x],
+                    y: [y],
+                    mode: 'markers',
+                    hoverinfo: 'none',
+                    marker: {
+                        color: 'blue',
+                        size: 15
+                    }
+                };
+            } else {
+                // Draw the path to the next node
+                lastTrace = {
+                    x: [x],
+                    y: [y],
+                    mode: 'markers',
+                    hoverinfo: 'none',
+                    marker: {
+                        color: 'blue',
+                        size: 15
+                    }
+                };
             }
-            alert('Closest point clicked:\n\n' + pts);
+
+            tracesAdded++;
+            Plotly.addTraces('mapDiv', lastTrace)
         });
+
+        // Action to clear the map
+        function clearPaths() {
+            if (tracesAdded == 0) {
+                return;
+            }
+
+            var tracesToDelete = [];
+            for (var i = 0 - tracesAdded; i < 0; i++) {
+                tracesToDelete.push(i);
+            }
+
+            Plotly.deleteTraces('mapDiv', tracesToDelete);
+            lastTrace = null;
+            tracesAdded = 0;
+        }
     </script>
 </body>
