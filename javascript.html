@@ -28,12 +28,12 @@
         //////////////////////// Dijkstra's Algorithm ////////////////////////
 
         // Modified from: http://jsfiddle.net/toadskipper/rPhc4/
-        function Dijkstra(roads, source, dest) {
+        function Dijkstra(paths, source, dest) {
             var inf = Number.POSITIVE_INFINITY;
             var distance = {};
             var done = {};
             var pred = {};
-            for (var i in roads) {
+            for (var i in paths) {
                 distance[i] = inf;
                 pred[i] = 0;
                 done[i] = false;
@@ -41,10 +41,10 @@
 
             distance[source] = 0;
 
-            for (i in roads) {
+            for (i in paths) {
                 var minDist = inf,
                     closest;
-                for (var j in roads) {
+                for (var j in paths) {
                     if (!done[j]) {
                         if (distance[j] <= minDist) {
                             minDist = distance[j];
@@ -57,7 +57,7 @@
                     break;
                 }
 
-                var neighbors = roadsFrom(closest);
+                var neighbors = pathsFrom(paths, closest);
                 for (var nb in neighbors) {
                     var w = neighbors[nb];
                     if (!done[nb]) {
@@ -71,52 +71,38 @@
 
             i = dest;
             if (distance[i] < inf) {
-                var thePath = i;
-                var place = i;
-                while (place !== source) {
-                    place = pred[place];
-                    if (place !== source) {
-                        thePath = place + '->' + thePath;
-                    }
+                var thePath = [i];
+                var node = i;
+                while (node !== source) {
+                    node = pred[node];
+                    thePath.unshift(node);
                 }
-                thePath = place + '->' + thePath;
-                console.log("Distance from " + source + "-->" + dest + " : " +
-                    distance[i] + ' (' + thePath + ')' + '<br/>');
+
+                return thePath;
             } else {
-                $('#out').append("no path" + '<br/>');
+                return null;
             }
         }
 
-        var roads = {};
-
-        function makeRoad(from, to, length) {
-            function addRoad(from, to) {
-                if (!(from in roads)) {
-                    roads[from] = {};
+        function makePath(paths, from, to, distance) {
+            function addPath(from, to) {
+                if (!(from in paths)) {
+                    paths[from] = {};
                 }
-                roads[from][to] = length;
+                paths[from][to] = distance;
             }
-            addRoad(from, to);
-            addRoad(to, from);
+            addPath(from, to);
+            addPath(to, from);
         }
 
-        function makeRoads(start) {
-            for (var i = 1; i < arguments.length; i += 2) {
-                makeRoad(start, arguments[i], arguments[i + 1]);
-            }
-        }
-
-        function roadsFrom(place) {
-            var found = roads[place];
+        function pathsFrom(paths, node) {
+            var found = paths[node];
             if (found === undefined) {
-                print("No place named '" + place + "' found.");
+                console.log("No node named '" + node + "' found.");
             } else {
                 return found;
             }
         }
-
-        makeRoads("A", "B", 2, "C", 3);
-        //Dijkstra(roads, "A", "F");
 
         ////////////////////////// Helper Functions //////////////////////////
 
@@ -130,10 +116,20 @@
             return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
         }
 
-        function parseTuple(t) {
-            var tuple = t.replace(/^\(|\)$/g, "").split(",").map(Number);
+        function nameToCoords(name) {
+            var coords = name.replace(/^\(|\)$/g, "").split(", ").map(Number);
 
-            return tuple;
+            return coords;
+        }
+
+        function coordsToName(coords) {
+            var name = "(" + coords[0] + ", " + coords[1] + ")";
+
+            return name;
+        }
+
+        function rotateClockwise(coords) {
+            return [coords[1], -coords[0]];
         }
 
         function matchLine(line) {
@@ -141,10 +137,8 @@
             var match = regEx.exec(line);
             var left = match[1];
             var right = match[2];
-            var coords = parseTuple(left);
-            coords = [coords[1], -coords[0]];
 
-            return [left, coords, right];
+            return [left, right];
         }
 
         //////////////////////////// Map Creation ////////////////////////////
@@ -154,6 +148,7 @@
         var nodesX = [];
         var nodesY = [];
         var nodeNames = [];
+        var paths = {};
 
         function getMap() {
             // Read from the map file and initialize graph structures
@@ -174,36 +169,38 @@
                         }
 
                         // Match the line to a regex to extract node data
-                        var [parentNode, parentNodeCoords, numEdges] = matchLine(line);
+                        var [parentNodeName, numEdges] = matchLine(line);
+                        var parentNodeCoords = rotateClockwise(nameToCoords(parentNodeName));
                         numEdges = parseInt(numEdges);
-                        if (numEdges != 0) {
-                            if (!(parentNode in nodesAdded)) {
+
+                        if (numEdges > 0) {
+                            if (!(parentNodeName in nodesAdded)) {
                                 // Dictionary is used for checking-speed, but value is unneeded
-                                nodesAdded[parentNode] = 0;
+                                nodesAdded[parentNodeName] = 0;
                                 nodesX.push(parentNodeCoords[0]);
                                 nodesY.push(parentNodeCoords[1]);
-                                nodeNames.push(parentNode);
+                                nodeNames.push(parentNodeName);
                             }
                         }
 
                         // Add edges to the graph
                         for (var ii = 1; ii <= numEdges; ii++) {
-                            var [edgeNode, edgeNodeCoords, meta] = matchLine(lines[i + ii]);
-                            if (!(edgeNode in nodesAdded)) {
-                                nodesAdded[edgeNode] = 0;
+                            var [edgeNodeName, meta] = matchLine(lines[i + ii]);
+                            var edgeNodeCoords = rotateClockwise(nameToCoords(edgeNodeName));
+
+                            if (!(edgeNodeName in nodesAdded)) {
+                                nodesAdded[edgeNodeName] = 0;
                                 nodesX.push(edgeNodeCoords[0]);
                                 nodesY.push(edgeNodeCoords[1]);
-                                nodeNames.push(edgeNode);
+                                nodeNames.push(edgeNodeName);
                             }
 
-                            if (!((parentNode + edgeNode) in edgesAdded) && !((edgeNode + parentNode) in edgesAdded)) {
-                                edgesAdded[parentNode + edgeNode] = 0;
+                            if (!((parentNodeName + edgeNodeName) in edgesAdded) && !((edgeNodeName + parentNodeName) in edgesAdded)) {
+                                edgesAdded[parentNodeName + edgeNodeName] = 0;
                                 edgesX.push(parentNodeCoords[0], edgeNodeCoords[0], null);
                                 edgesY.push(parentNodeCoords[1], edgeNodeCoords[1], null);
+                                makePath(paths, coordsToName(parentNodeCoords), coordsToName(edgeNodeCoords), nodeDistance(parentNodeCoords, edgeNodeCoords));
                             }
-
-                            //// TODO Dijkstra
-
                         }
                         i += numEdges;
                     }
@@ -219,7 +216,6 @@
         var edgeTrace = {
             x: edgesX,
             y: edgesY,
-            type: 'scatter',
             line: {
                 width: 1,
                 color: '#888'
@@ -272,42 +268,73 @@
         });
 
         // Keep track of extra traces that are displayed
-        var lastTrace = null;
+        var lastNodeName = null;
+        var nodesDrawnX = [];
+        var nodesDrawnY = [];
         var tracesAdded = 0;
 
         // Action for when a node is clicked on
         myPlot.on('plotly_click', function(data) {
             var x = data.points[0].x;
             var y = data.points[0].y;
+            var nodeName = coordsToName([x, y]);
 
-            if (lastTrace == null) {
+            var newNodeTrace = {
+                x: [],
+                y: [],
+                mode: 'markers',
+                hoverinfo: 'none',
+                marker: {
+                    color: 'blue',
+                    size: 15
+                }
+            };
+
+            if (lastNodeName == null) {
                 // Draw the starting node
-                lastTrace = {
-                    x: [x],
-                    y: [y],
-                    mode: 'markers',
-                    hoverinfo: 'none',
-                    marker: {
-                        color: 'blue',
-                        size: 15
-                    }
-                };
+                newNodeTrace.x = [x];
+                newNodeTrace.y = [y]
+                nodesDrawnX = [x];
+                nodesDrawnY = [y];
+                Plotly.addTraces('mapDiv', newNodeTrace)
             } else {
                 // Draw the path to the next node
-                lastTrace = {
-                    x: [x],
-                    y: [y],
-                    mode: 'markers',
+                var path = Dijkstra(paths, lastNodeName, nodeName);
+                var Xs = [];
+                var Ys = [];
+                for (var i = 0; i + 1 < path.length; i++) {
+                    var startCoords = nameToCoords(path[i]);
+                    var endCoords = nameToCoords(path[i + 1]);
+                    Xs.push(startCoords[0], endCoords[0], null);
+                    Ys.push(startCoords[1], endCoords[1], null);
+                }
+
+                var newEdgeTrace = {
+                    x: Xs,
+                    y: Ys,
+                    line: {
+                        width: 5,
+                        color: 'red'
+                    },
                     hoverinfo: 'none',
-                    marker: {
-                        color: 'blue',
-                        size: 15
-                    }
+                    mode: 'lines'
                 };
+
+                Plotly.addTraces('mapDiv', newEdgeTrace)
+
+                // Remove the trace that draws endpoint nodes, then re-add so it appears on top
+                var endNodeCoords = nameToCoords(path[path.length - 1]);
+                nodesDrawnX.push(endNodeCoords[0]);
+                nodesDrawnY.push(endNodeCoords[1]);
+                newNodeTrace.x = nodesDrawnX;
+                newNodeTrace.y = nodesDrawnY;
+
+                Plotly.deleteTraces('mapDiv', -2);
+                Plotly.addTraces('mapDiv', newNodeTrace);
             }
 
+            lastNodeName = nodeName;
             tracesAdded++;
-            Plotly.addTraces('mapDiv', lastTrace)
         });
 
         // Action to clear the map
@@ -322,7 +349,9 @@
             }
 
             Plotly.deleteTraces('mapDiv', tracesToDelete);
-            lastTrace = null;
+            lastNodeName = null;
+            nodesDrawnX = [];
+            nodesDrawnY = [];
             tracesAdded = 0;
         }
     </script>
