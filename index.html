@@ -18,9 +18,11 @@
     <div>
         <h1>Welcome to Florian and Jonathan's Project!</h1>
         <p>Shortest route between two intersections extracted from an old map of New York.</p>
-        <button onclick="clearPaths()">Clear Paths</button>
     </div>
     <div id="mapDiv"></div>
+    <div>
+        <button onclick="clearPaths()">Clear Paths</button>
+    </div>
 
     <script>
         var mapDirectory = "maps/new-york.txt";
@@ -218,7 +220,7 @@
             y: edgesY,
             line: {
                 width: 1,
-                color: '#888'
+                color: '#e1e1e1'
             },
             hoverinfo: 'none',
             mode: 'lines'
@@ -232,17 +234,20 @@
             mode: 'markers',
             hoverinfo: 'text',
             marker: {
-                color: 'black',
-                size: 5
+                color: 'white',
+                size: 5,
+                opacity: 0.8
             }
         };
 
         var myPlot = document.getElementById('mapDiv');
         var data = [edgeTrace, nodeTrace];
 
+
         var layout = {
             showlegend: false,
             hovermode: 'closest',
+            //height: 600, width: 600,
             margin: {
                 b: 0,
                 l: 0,
@@ -253,14 +258,27 @@
                 showgrid: false,
                 zeroline: false,
                 showticklabels: false,
-                fixedrange: true
+                fixedrange: true,
             },
             yaxis: {
                 showgrid: false,
                 zeroline: false,
                 showticklabels: false,
                 fixedrange: true
-            }
+            },
+            // Background image of the map
+            images: [{
+                'source': "images/backgroundMap.png",
+                'sizing': 'stretch',
+                'xref': 'paper',
+                'yref': 'paper',
+                'x': -0.066,
+                'y': 0.995,
+                'layer': 'below',
+                'sizex': 1.168,
+                'sizey': 1.013,
+                'opacity': 1
+            }]
         };
 
         Plotly.newPlot('mapDiv', data, layout, {
@@ -320,8 +338,6 @@
                     mode: 'lines'
                 };
 
-                Plotly.addTraces('mapDiv', newEdgeTrace)
-
                 // Remove the trace that draws endpoint nodes, then re-add so it appears on top
                 var endNodeCoords = nameToCoords(path[path.length - 1]);
                 nodesDrawnX.push(endNodeCoords[0]);
@@ -329,8 +345,9 @@
                 newNodeTrace.x = nodesDrawnX;
                 newNodeTrace.y = nodesDrawnY;
 
-                Plotly.deleteTraces('mapDiv', -2);
-                Plotly.addTraces('mapDiv', newNodeTrace);
+                var newTraces = [newEdgeTrace, newNodeTrace];
+                Plotly.addTraces('mapDiv', newTraces);
+                Plotly.deleteTraces('mapDiv', -3);
             }
 
             lastNodeName = nodeName;

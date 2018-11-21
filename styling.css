@@ -9,6 +9,7 @@ button {
     outline: none;
     height: 30px;
     cursor: pointer;
+    margin-top: 10px;
 }
 
 #mapDiv {
