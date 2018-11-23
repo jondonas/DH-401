@@ -2,10 +2,13 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
+    <script src="javascript/dijkstra.js" type="text/javascript"></script>
+    <script src="javascript/mapParsing.js" type="text/javascript"></script>
+
     <link rel="stylesheet" href="css/styling.css">
 </head>
 
-<title>DH-405</title>
+<title>DH-405 Project</title>
 <style>
     body {
         width: 45em;
@@ -22,200 +25,18 @@
     <div id="mapDiv"></div>
     <div>
         <button onclick="clearPaths()">Clear Paths</button>
+        <button onclick="toggleNetwork(this)">Show Network</button>
     </div>
 
     <script>
-        var mapDirectory = "maps/new-york.txt";
-
-        //////////////////////// Dijkstra's Algorithm ////////////////////////
-
-        // Modified from: http://jsfiddle.net/toadskipper/rPhc4/
-        function Dijkstra(paths, source, dest) {
-            var inf = Number.POSITIVE_INFINITY;
-            var distance = {};
-            var done = {};
-            var pred = {};
-            for (var i in paths) {
-                distance[i] = inf;
-                pred[i] = 0;
-                done[i] = false;
-            }
-
-            distance[source] = 0;
-
-            for (i in paths) {
-                var minDist = inf,
-                    closest;
-                for (var j in paths) {
-                    if (!done[j]) {
-                        if (distance[j] <= minDist) {
-                            minDist = distance[j];
-                            closest = j;
-                        }
-                    }
-                }
-                done[closest] = true;
-                if (closest === dest) {
-                    break;
-                }
-
-                var neighbors = pathsFrom(paths, closest);
-                for (var nb in neighbors) {
-                    var w = neighbors[nb];
-                    if (!done[nb]) {
-                        if (distance[closest] + w < distance[nb]) {
-                            distance[nb] = distance[closest] + w;
-                            pred[nb] = closest;
-                        }
-                    }
-                }
-            }
-
-            i = dest;
-            if (distance[i] < inf) {
-                var thePath = [i];
-                var node = i;
-                while (node !== source) {
-                    node = pred[node];
-                    thePath.unshift(node);
-                }
-
-                return thePath;
-            } else {
-                return null;
-            }
-        }
-
-        function makePath(paths, from, to, distance) {
-            function addPath(from, to) {
-                if (!(from in paths)) {
-                    paths[from] = {};
-                }
-                paths[from][to] = distance;
-            }
-            addPath(from, to);
-            addPath(to, from);
-        }
-
-        function pathsFrom(paths, node) {
-            var found = paths[node];
-            if (found === undefined) {
-                console.log("No node named '" + node + "' found.");
-            } else {
-                return found;
-            }
-        }
-
-        ////////////////////////// Helper Functions //////////////////////////
-
-        function nodeDistance(n1, n2) {
-            var x1 = n1[0];
-            var y1 = n1[1];
-            var x2 = n2[0];
-            var y2 = n2[1];
-
-            // Return the straight-line distance between two points
-            return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-        }
-
-        function nameToCoords(name) {
-            var coords = name.replace(/^\(|\)$/g, "").split(", ").map(Number);
-
-            return coords;
-        }
-
-        function coordsToName(coords) {
-            var name = "(" + coords[0] + ", " + coords[1] + ")";
-
-            return name;
-        }
-
-        function rotateClockwise(coords) {
-            return [coords[1], -coords[0]];
-        }
-
-        function matchLine(line) {
-            var regEx = /^(.*)\|(.*)$/g;
-            var match = regEx.exec(line);
-            var left = match[1];
-            var right = match[2];
-
-            return [left, right];
-        }
-
-        //////////////////////////// Map Creation ////////////////////////////
-
-        var edgesX = [];
-        var edgesY = [];
-        var nodesX = [];
-        var nodesY = [];
-        var nodeNames = [];
-        var paths = {};
-
-        function getMap() {
-            // Read from the map file and initialize graph structures
-            $.get({
-                url: mapDirectory,
-                async: false,
-                success: function(txt) {
-                    var lines = txt.split("\n");
-                    var nodesAdded = {};
-                    var edgesAdded = {};
-
-                    for (var i = 0, len = lines.length; i < len; i++) {
-                        var line = lines[i];
-
-                        // Skip the file header and/or empty lines
-                        if (line.charAt(0) != "(") {
-                            continue;
-                        }
-
-                        // Match the line to a regex to extract node data
-                        var [parentNodeName, numEdges] = matchLine(line);
-                        var parentNodeCoords = rotateClockwise(nameToCoords(parentNodeName));
-                        numEdges = parseInt(numEdges);
-
-                        if (numEdges > 0) {
-                            if (!(parentNodeName in nodesAdded)) {
-                                // Dictionary is used for checking-speed, but value is unneeded
-                                nodesAdded[parentNodeName] = 0;
-                                nodesX.push(parentNodeCoords[0]);
-                                nodesY.push(parentNodeCoords[1]);
-                                nodeNames.push(parentNodeName);
-                            }
-                        }
-
-                        // Add edges to the graph
-                        for (var ii = 1; ii <= numEdges; ii++) {
-                            var [edgeNodeName, meta] = matchLine(lines[i + ii]);
-                            var edgeNodeCoords = rotateClockwise(nameToCoords(edgeNodeName));
-
-                            if (!(edgeNodeName in nodesAdded)) {
-                                nodesAdded[edgeNodeName] = 0;
-                                nodesX.push(edgeNodeCoords[0]);
-                                nodesY.push(edgeNodeCoords[1]);
-                                nodeNames.push(edgeNodeName);
-                            }
-
-                            if (!((parentNodeName + edgeNodeName) in edgesAdded) && !((edgeNodeName + parentNodeName) in edgesAdded)) {
-                                edgesAdded[parentNodeName + edgeNodeName] = 0;
-                                edgesX.push(parentNodeCoords[0], edgeNodeCoords[0], null);
-                                edgesY.push(parentNodeCoords[1], edgeNodeCoords[1], null);
-                                makePath(paths, coordsToName(parentNodeCoords), coordsToName(edgeNodeCoords), nodeDistance(parentNodeCoords, edgeNodeCoords));
-                            }
-                        }
-                        i += numEdges;
-                    }
-                }
-            });
-        }
-
-        getMap();
+        var mapFile = "maps/new-york.txt";
+        var backgroundImage = "images/backgroundMap.png";
 
         /////////////////////////////// Plotly ///////////////////////////////
 
         // Plot the edges
         var edgeTrace = {
+            visible: false,
             x: edgesX,
             y: edgesY,
             line: {
@@ -236,7 +57,7 @@
             marker: {
                 color: 'white',
                 size: 5,
-                opacity: 0.8
+                opacity: 0
             }
         };
 
@@ -247,7 +68,6 @@
         var layout = {
             showlegend: false,
             hovermode: 'closest',
-            //height: 600, width: 600,
             margin: {
                 b: 0,
                 l: 0,
@@ -268,7 +88,7 @@
             },
             // Background image of the map
             images: [{
-                'source': "images/backgroundMap.png",
+                'source': backgroundImage,
                 'sizing': 'stretch',
                 'xref': 'paper',
                 'yref': 'paper',
@@ -303,8 +123,8 @@
                 mode: 'markers',
                 hoverinfo: 'none',
                 marker: {
-                    color: 'blue',
-                    size: 15
+                    color: '#2a2a2a',
+                    size: 13
                 }
             };
 
@@ -332,7 +152,7 @@
                     y: Ys,
                     line: {
                         width: 5,
-                        color: 'red'
+                        color: '#4a80f5'
                     },
                     hoverinfo: 'none',
                     mode: 'lines'
@@ -370,6 +190,30 @@
             nodesDrawnX = [];
             nodesDrawnY = [];
             tracesAdded = 0;
+        }
+
+        // Toggles if the network is visible
+        var networkVisible = false;
+
+        function toggleNetwork(button) {
+            var newData;
+
+            if (networkVisible) {
+                button.innerHTML = "Show Network";
+                newData = {
+                    'visible': [false, undefined],
+                    'marker.opacity': [undefined, 0]
+                };
+            } else {
+                button.innerHTML = "Hide Network";
+                newData = {
+                    'visible': [true, undefined],
+                    'marker.opacity': [undefined, 0.8]
+                };
+            }
+
+            Plotly.restyle('mapDiv', newData, [0, 1]);
+            networkVisible = !networkVisible;
         }
     </script>
 </body>

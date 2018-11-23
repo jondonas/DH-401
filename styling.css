@@ -8,8 +8,11 @@ button {
     font-size: 9pt;
     outline: none;
     height: 30px;
+    width: 110px;
     cursor: pointer;
     margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 10px;
 }
 
 #mapDiv {
