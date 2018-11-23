@@ -1,3 +1,6 @@
+var mapFile = "maps/new-york.txt";
+var backgroundImage = "images/backgroundMap.png";
+
 ////////////////////////// Helper Functions //////////////////////////
 
 function nodeDistance(n1, n2) {

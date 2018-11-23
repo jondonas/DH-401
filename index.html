@@ -29,9 +29,6 @@
     </div>
 
     <script>
-        var mapFile = "maps/new-york.txt";
-        var backgroundImage = "images/backgroundMap.png";
-
         /////////////////////////////// Plotly ///////////////////////////////
 
         // Plot the edges
@@ -140,11 +137,10 @@
                 var path = Dijkstra(paths, lastNodeName, nodeName);
                 var Xs = [];
                 var Ys = [];
-                for (var i = 0; i + 1 < path.length; i++) {
-                    var startCoords = nameToCoords(path[i]);
-                    var endCoords = nameToCoords(path[i + 1]);
-                    Xs.push(startCoords[0], endCoords[0], null);
-                    Ys.push(startCoords[1], endCoords[1], null);
+                for (var i = 0; i < path.length; i++) {
+                    var nodeCoords = nameToCoords(path[i]);
+                    Xs.push(nodeCoords[0]);
+                    Ys.push(nodeCoords[1]);
                 }
 
                 var newEdgeTrace = {
