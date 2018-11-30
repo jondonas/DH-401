@@ -2,24 +2,54 @@ button {
     color: #444444;
     background: #F3F3F3;
     border: 1px #DADADA solid;
-    padding: 5px 10px;
+    padding: 5px 5px;
     border-radius: 2px;
     font-weight: bold;
     font-size: 9pt;
     outline: none;
     height: 30px;
-    width: 110px;
+    width: 100px;
     cursor: pointer;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-right: 10px;
+    position: absolute;
 }
 
-#mapDiv {
+#clearPaths {
+    margin-left: 10;
+    margin-top: 430px;
+}
+
+#toggleNetwork {
+    margin-left: 120;
+    margin-top: 430px;
+}
+
+.container {
+    width: 815px;
+    height: 600px;
+    margin: auto;
+    position:relative; 
+    display:block;
+}
+
+.mapDiv {
     width: 600px;
     height: 600px;
     margin: 0 auto;
     text-align: center;
+    float: left;
+}
+
+.infoDiv {
+    margin-left: 610;
+    height: 400px;
+    width: 205px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: gray;
+    position: absolute;
+    margin-top: 10px;
+    background-color: #F3F3F3;
 }
 
 h1 {
@@ -27,6 +57,28 @@ h1 {
     margin-bottom: 0px;
 }
 
+h3 {
+    margin-bottom: 30px;
+}
+
 div {
     text-align: center;
+}
+
+.infoText {
+    font-size: 13px;
+    text-align: left;
+    margin-left: 10px;
+}
+
+#placeholder {
+    font-style: italic;
+}
+
+#credits {
+    margin-top: 560px;
+    margin-left: 15px;
+    position: absolute;
+    display: inline-block;
+    font-size: 13px;
 }

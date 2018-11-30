@@ -4,6 +4,7 @@
 
     <script src="javascript/dijkstra.js" type="text/javascript"></script>
     <script src="javascript/mapParsing.js" type="text/javascript"></script>
+    <script src="javascript/distanceCalc.js" type="text/javascript"></script>
 
     <link rel="stylesheet" href="css/styling.css">
 </head>
@@ -19,17 +20,27 @@
 
 <body>
     <div>
-        <h1>Welcome to Florian and Jonathan's Project!</h1>
-        <p>Shortest route between two intersections extracted from an old map of New York.</p>
+        <h1>DH-405 Shortest-Path Route Extraction</h1>
+        <p>Routing demo between intersections extracted from a map of New York (1829)</p>
     </div>
-    <div id="mapDiv"></div>
-    <div>
-        <button onclick="clearPaths()">Clear Paths</button>
-        <button onclick="toggleNetwork(this)">Show Network</button>
-    </div>
+    <section class="container">
+        <div class="mapDiv" id="mapDiv"></div>
+        <div class="infoDiv">
+            <h3> Distance Calculator </h3>
+            <p id="coordinates" class="infoText"></p>
+            <p id="distance" class="infoText"></p>
+            <p id="totalDistance" class="infoText"></p>
+            <p id="placeholder"><br>Select start and end points on the map to show the shortest paths</p>
+        </div>
+        <button id="clearPaths" onclick="clearPaths()">Clear Paths</button>
+        <button id="toggleNetwork" onclick="toggleNetwork(this)">Show Network</button>
+        <p id="credits">Project created by:<br>Jonathan Donas & Florian Buchner</p>
+    </section>
 
     <script>
         /////////////////////////////// Plotly ///////////////////////////////
+
+        infoVisible(false);
 
         // Plot the edges
         var edgeTrace = {
@@ -132,9 +143,17 @@
                 nodesDrawnX = [x];
                 nodesDrawnY = [y];
                 Plotly.addTraces('mapDiv', newNodeTrace)
+
+                infoUpdate(nodeName, null, distance);
+                infoVisible(true);
             } else {
                 // Draw the path to the next node
                 var path = Dijkstra(paths, lastNodeName, nodeName);
+
+                // In case of no path, return rather than crash
+                if (path == null)
+                    return;
+
                 var Xs = [];
                 var Ys = [];
                 for (var i = 0; i < path.length; i++) {
@@ -161,9 +180,14 @@
                 newNodeTrace.x = nodesDrawnX;
                 newNodeTrace.y = nodesDrawnY;
 
+                // Draw the new path
                 var newTraces = [newEdgeTrace, newNodeTrace];
                 Plotly.addTraces('mapDiv', newTraces);
                 Plotly.deleteTraces('mapDiv', -3);
+
+                // Show the real-world distance between two points
+                var distance = getDistanceMetres(path);
+                infoUpdate(lastNodeName, nodeName, distance);
             }
 
             lastNodeName = nodeName;
@@ -186,6 +210,8 @@
             nodesDrawnX = [];
             nodesDrawnY = [];
             tracesAdded = 0;
+
+            infoVisible(false);
         }
 
         // Toggles if the network is visible
