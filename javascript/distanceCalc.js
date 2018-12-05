@@ -3,6 +3,14 @@
 //  found the corresponding scale between the two distances
 // This converts from virtual map distance to metres
 scaleFactor = 3.216377148
+horseWalk = 1.9444
+horseTrot = 3.6111
+humanWalk = 1.4
+
+function getTimeInMinutes(speed, distance) {
+    var time = distance / speed / 60;
+    return time < 1 ? 1 : Math.ceil(time);
+}
 
 function getDistanceMetres(path) {
     var distance = 0;
@@ -24,20 +32,25 @@ function toDisplayCoords(coords) {
 totalDistance = 0;
 
 function infoUpdate(startNode, endNode, distance) {
-    var coordinatesId = document.getElementById("coordinates");
-    var distanceId = document.getElementById("distance");
-    var totalDistanceId = document.getElementById("totalDistance");
     startNode = toDisplayCoords(startNode);
 
     if (endNode == null) {
-        coordinatesId.innerHTML = startNode + " =>";
+        document.getElementById("coordinates").innerHTML = startNode + " =>";
     }
     else {
         endNode = toDisplayCoords(endNode);
         totalDistance += distance
-        coordinatesId.innerHTML = startNode + " => " + endNode;
-        distanceId.innerHTML = "<b>Distance: </b> " + distance + " m";
-        totalDistanceId.innerHTML = "<b>Total Distance: </b> " + totalDistance + " m";
+        document.getElementById("coordinates").innerHTML = startNode + " => " + endNode;
+        document.getElementById("distance").innerHTML = "<b>Distance: </b> " + distance + " m";
+        document.getElementById("totalDistance").innerHTML = "<b>Total Distance: </b> " + totalDistance + " m";
+
+        document.getElementById("humanWalk").innerHTML = "<img class='icon' src='/icons/pedestrian-walking.png'/><p class='iconP'>" + getTimeInMinutes(humanWalk, distance) + " minutes</p>";
+        document.getElementById("horseWalk").innerHTML = "<img class='icon' src='/icons/horse-slow.png'/><p class='iconP'>" + getTimeInMinutes(horseWalk, distance) + " minutes</p>";
+        document.getElementById("horseTrot").innerHTML = "<img class='icon' src='/icons/horse-fast.png'/><p class='iconP'>" + getTimeInMinutes(horseTrot, distance) + " minutes</p>";
+
+        //document.getElementById("humanWalk").innerHTML = "<b>Walking Duration: </b> " + getTimeInMinutes(humanWalk, distance) + " min";
+        //document.getElementById("horseWalk").innerHTML = "<b>Horse Walk Duration: </b> " + getTimeInMinutes(horseWalk, distance) + " min";
+        //document.getElementById("horseTrot").innerHTML = "<b>Horse Trot Duration: </b> " + getTimeInMinutes(horseTrot, distance) + " min";
     }
 }
 
@@ -49,20 +62,20 @@ function toggleElementVisibility(e, visible) {
 }
 
 function infoVisible(visible) {
-    var coordinatesId = document.getElementById("coordinates");
-    var distanceId = document.getElementById("distance");
-    var totalDistanceId = document.getElementById("totalDistance");
+    var infoTextIds = document.getElementsByClassName("infoText");
     var placeholderId = document.getElementById("placeholder");
 
-    toggleElementVisibility(coordinatesId, visible);
-    toggleElementVisibility(distanceId, visible);
-    toggleElementVisibility(totalDistanceId, visible);
+    for (var i = 0; i < infoTextIds.length; ++i) {
+        toggleElementVisibility(infoTextIds[i], visible);
+    }
+
     toggleElementVisibility(placeholderId, !visible);
 
     if (!visible) {
-        distanceId.innerHTML = "";
-        totalDistanceId.innerHTML = "";
+        for (var i = 0; i < infoTextIds.length; ++i) {
+            infoTextIds[i].innerHTML = "";
+        }
+
         totalDistance = 0;
     }
-
 }

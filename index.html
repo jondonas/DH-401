@@ -29,11 +29,28 @@
             <h3> Distance Calculator </h3>
             <p id="coordinates" class="infoText"></p>
             <p id="distance" class="infoText"></p>
+
+            <p id="humanWalk" class="infoText"></p>
+            <p id="horseWalk" class="infoText"></p>
+            <p id="horseTrot" class="infoText"></p>
+            
             <p id="totalDistance" class="infoText"></p>
+
             <p id="placeholder"><br>Select start and end points on the map to show the shortest paths</p>
+       
+            <div class="tooltip">Speed Assumptions
+                <span class="tooltiptext">
+                    We make the following assumptions about speed:<br>
+                    <br>
+                    Human walking speed is <b>1.4 m/s</b> <br>
+                    Horse walking speed is <b>1.9 m/s</b> <br>
+                    Horse trotting speed is <b>3.6 m/s</b> <br>
+                </span>
+            </div>
         </div>
         <button id="clearPaths" onclick="clearPaths()">Clear Paths</button>
         <button id="toggleNetwork" onclick="toggleNetwork(this)">Show Network</button>
+
         <p id="credits">Project created by:<br>Jonathan Donas & Florian Buchner</p>
     </section>
 
