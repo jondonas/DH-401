@@ -15,12 +15,12 @@ button {
 
 #clearPaths {
     margin-left: 10;
-    margin-top: 430px;
+    margin-top: 500px;
 }
 
 #toggleNetwork {
     margin-left: 120;
-    margin-top: 430px;
+    margin-top: 500px;
 }
 
 .container {
@@ -41,7 +41,7 @@ button {
 
 .infoDiv {
     margin-left: 610;
-    height: 400px;
+    height: 470px;
     width: 205px;
     border-style: solid;
     border-width: 2px;
@@ -72,11 +72,11 @@ div {
 }
 
 #distance.infoText {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 #totalDistance.infoText {
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 .icon { 
@@ -92,8 +92,13 @@ div {
     padding-top: 3px;
 }
 
+.iconC {
+    padding-top: 3px;
+}
+
 #placeholder {
     font-style: italic;
+    margin-top: 50px;
 }
 
 #credits {
@@ -149,6 +154,11 @@ div {
 }
 
 body:after {
-    content: url(/icons/pedestrian-walking.png) url(/icons/horse-slow.png) url(/icons/horse-fast.png);
+    content: url(/icons/pedestrian-walking.png)
+             url(/icons/horse-slow.png)
+             url(/icons/horse-fast.png)
+             url(/icons/destination.png)
+             url(/icons/circle-shape-outline.png)
+             url(/icons/home.png);
     display: none;
 }

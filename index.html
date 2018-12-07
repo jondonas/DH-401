@@ -40,7 +40,7 @@
        
             <div class="tooltip">Speed Assumptions
                 <span class="tooltiptext">
-                    We make the following assumptions about speed:<br>
+                    We make the following assumptions about travel speed:<br>
                     <br>
                     Human walking speed is <b>1.4 m/s</b> <br>
                     Horse walking speed is <b>1.9 m/s</b> <br>
@@ -136,8 +136,13 @@
         var nodesDrawnY = [];
         var tracesAdded = 0;
 
+
         // Action for when a node is clicked on
         myPlot.on('plotly_click', function(data) {
+            if (tracesAdded == 5) {
+                return
+            }
+
             var x = data.points[0].x;
             var y = data.points[0].y;
             var nodeName = coordsToName([x, y]);
