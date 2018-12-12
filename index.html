@@ -47,6 +47,8 @@
                     Horse trotting speed is <b>3.6 m/s</b> <br>
                 </span>
             </div>
+
+            <p id="warning">Max # of destinations reached</p>
         </div>
         <button id="clearPaths" onclick="clearPaths()">Clear Paths</button>
         <button id="toggleNetwork" onclick="toggleNetwork(this)">Show Network</button>
@@ -117,13 +119,9 @@
                 'sizing': 'stretch',
                 'xref': 'paper',
                 'yref': 'paper',
-                //'x': -0.066,
-                //'y': 0.995,
 				'x': -0.073,
                 'y': 1.000,
                 'layer': 'below',
-				//'sizex': 1.168,
-				//'sizey': 1.013,
                 'sizex': 1.173,
                 'sizey': 1.017,
                 'opacity': 1
@@ -131,7 +129,7 @@
         };
 
         Plotly.newPlot('mapDiv', data, layout, {
-			displayModeBar: false
+            displayModeBar: false
         });
 
         // Keep track of extra traces that are displayed
@@ -144,7 +142,12 @@
         // Action for when a node is clicked on
         myPlot.on('plotly_click', function(data) {
             if (tracesAdded == 5) {
-                return
+                warningId = document.getElementById("warning")
+                warningId.style.visibility = "visible";
+                setTimeout(function() {
+                    warningId.style.visibility = "hidden";
+                }, 3000);
+                return;
             }
 
             var x = data.points[0].x;

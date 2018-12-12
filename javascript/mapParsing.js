@@ -45,7 +45,6 @@ var edgesY = [];
 var nodesX = [];
 var nodesY = [];
 var nodeNames = [];
-//var nodeNamesLatLong = [];
 var paths = {};
 
 function getMap() {
@@ -77,11 +76,8 @@ function getMap() {
                         nodesAdded[parentNodeName] = 0;
                         nodesX.push(parentNodeCoords[0]);
                         nodesY.push(parentNodeCoords[1]);
-                        // for displaying graph coordinates on mouseover over nodes
-                        //nodeNames.push(parentNodeName);
                         // for displaying lat/long in degrees on mouseover over nodes
-                        parentNodeNameLatLong = displayCoordsToLatLong(parentNodeName);
-                        nodeNames.push(parentNodeNameLatLong);
+                        nodeNames.push(displayCoordsToLatLong(parentNodeName));
                     }
                 }
 
@@ -94,11 +90,8 @@ function getMap() {
                         nodesAdded[edgeNodeName] = 0;
                         nodesX.push(edgeNodeCoords[0]);
                         nodesY.push(edgeNodeCoords[1]);
-                        // for displaying graph coordinates on mouseover over nodes
-                        //nodeNames.push(edgeNodeName);
                         // for displaying lat/long in degrees on mouseover over nodes
-                        edgeNodeNameLatLong = displayCoordsToLatLong(edgeNodeName);
-                        nodeNames.push(edgeNodeNameLatLong);
+                        nodeNames.push(displayCoordsToLatLong(edgeNodeName));
                     }
 
                     if (!((parentNodeName + edgeNodeName) in edgesAdded) && !((edgeNodeName + parentNodeName) in edgesAdded)) {

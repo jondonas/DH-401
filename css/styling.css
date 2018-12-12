@@ -101,6 +101,18 @@ div {
     margin-top: 50px;
 }
 
+#warning {
+    font-style: italic;
+    position: absolute;
+    display: inline-block;
+    font-size: 14px;
+    bottom: 25px;
+    width: 300px;
+    color: red;
+    left: -50px;
+    visibility: hidden;
+}
+
 #credits {
     margin-top: 560px;
     margin-left: 15px;
