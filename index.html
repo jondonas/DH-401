@@ -3,9 +3,9 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
     <script src="javascript/dijkstra.js" type="text/javascript"></script>
-    <script src="javascript/mapParsing.js" type="text/javascript"></script>
     <script src="javascript/distanceCalc.js" type="text/javascript"></script>
-
+    <script src="javascript/mapParsing.js" type="text/javascript"></script>
+    
     <link rel="stylesheet" href="css/styling.css">
 </head>
 
@@ -117,17 +117,21 @@
                 'sizing': 'stretch',
                 'xref': 'paper',
                 'yref': 'paper',
-                'x': -0.066,
-                'y': 0.995,
+                //'x': -0.066,
+                //'y': 0.995,
+				'x': -0.073,
+                'y': 1.000,
                 'layer': 'below',
-                'sizex': 1.168,
-                'sizey': 1.013,
+				//'sizex': 1.168,
+				//'sizey': 1.013,
+                'sizex': 1.173,
+                'sizey': 1.017,
                 'opacity': 1
             }]
         };
 
         Plotly.newPlot('mapDiv', data, layout, {
-            displayModeBar: false
+			displayModeBar: false
         });
 
         // Keep track of extra traces that are displayed

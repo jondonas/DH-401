@@ -2,7 +2,7 @@
 // We chose identical points on the map and in Google Maps and 
 //  found the corresponding scale between the two distances
 // This converts from virtual map distance to metres
-scaleFactor = 3.216377148
+scaleFactor = 0.62183299696
 humanWalk = 1.4
 horseWalk = 1.9444
 horseTrot = 3.6111
@@ -29,6 +29,20 @@ function toDisplayCoords(coords) {
     return coordsToName(coords);
 }
 
+function displayCoordsToLatLong(coords) {
+    coords = nameToCoords(coords);
+    coeffsLat = [-5.6117311*Math.pow(10,-6), 3.2459423*Math.pow(10,-7), 40.740933];
+    coeffsLong = [4.1083295*Math.pow(10,-7), 7.2348956*Math.pow(10,-6), -74.026242];
+    latitude = coeffsLat[0]*coords[0] + coeffsLat[1]*coords[1] + coeffsLat[2];
+    longitude = coeffsLong[0]*coords[0] + coeffsLong[1]*coords[1] + coeffsLong[2];
+    
+    // round to 6 decimals
+    latitude = Number((latitude).toFixed(6));
+    longitude = Number((longitude).toFixed(6));
+    
+    return coordsToName([latitude, longitude]);
+}
+
 totalDistance = 0;
 humanWalkTime = 0;
 horseWalkTime = 0;
@@ -40,7 +54,7 @@ function infoUpdate(startNode, endNode, distance) {
 
     if (endNode == null) {
         nodesSoFar.push(startNode);
-        document.getElementById("coordinates").innerHTML = "<img class='icon' src='/icons/home.png'/><p class='iconC'>" + startNode + "</p>";
+        document.getElementById("coordinates").innerHTML = "<img class='icon' src='/icons/home.png'/><p class='iconC'>" + displayCoordsToLatLong(startNode) + "</p>";
     }
     else {
         endNode = toDisplayCoords(endNode);
@@ -50,13 +64,13 @@ function infoUpdate(startNode, endNode, distance) {
         coordsString = "";
         for (var i = 0; i < nodesSoFar.length; ++i) {
             if (i == 0) {
-                coordsString += "<img class='icon' src='/icons/home.png'/><p class='iconC'>" + nodesSoFar[i] + "</p>"
+                coordsString += "<img class='icon' src='/icons/home.png'/><p class='iconC'>" + displayCoordsToLatLong(nodesSoFar[i]) + "</p>"
             }
             else if (i == nodesSoFar.length - 1) {
-                coordsString += "<img class='icon' src='/icons/destination.png'/><p class='iconC' style='margin-bottom: 20px;'>" + nodesSoFar[i] + "</p>"
+                coordsString += "<img class='icon' src='/icons/destination.png'/><p class='iconC' style='margin-bottom: 20px;'>" + displayCoordsToLatLong(nodesSoFar[i]) + "</p>"
             }
             else {
-                coordsString += "<img class='icon' src='/icons/circle-shape-outline.png'/><p class='iconC'>" + nodesSoFar[i] + "</p>"
+                coordsString += "<img class='icon' src='/icons/circle-shape-outline.png'/><p class='iconC'>" + displayCoordsToLatLong(nodesSoFar[i]) + "</p>"
             }
         }
         document.getElementById("coordinates").innerHTML = coordsString;
